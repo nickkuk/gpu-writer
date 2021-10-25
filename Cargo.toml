@@ -1,0 +1,10 @@
+[package]
+name = "gpu-writer"
+version = "0.1.0"
+authors = [
+    "Nikolai Kuklin <nickkuklin@gmail.com>",
+  ]
+edition = "2021"
+publish = false
+
+[dependencies]
