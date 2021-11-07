@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = [
     "Nikolai Kuklin <nickkuklin@gmail.com>",
   ]
+license = "MIT"
 edition = "2021"
 publish = false
 
