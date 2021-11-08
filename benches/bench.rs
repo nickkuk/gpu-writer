@@ -1,5 +1,5 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use gpu_writer::{append_gpu_data, EmptyGpuTable, GpuData, GpuDataIter};
+use gpu_writer::{append_gpu_data, gpu_table, EmptyGpuTable, GpuData, GpuDataIter};
 use std::{io::Cursor, time::Duration};
 
 pub fn gpu_writer_bench(criterion: &mut Criterion) {
@@ -11,28 +11,28 @@ pub fn gpu_writer_bench(criterion: &mut Criterion) {
   let mut dst = vec![0u8; 16 * 1024 * 1024];
   group.bench_function("slice_write_mut_slice", |b| {
     b.iter(|| {
-      let gpu_table = append_gpu_data(EmptyGpuTable, src.as_slice());
+      let gpu_table = gpu_table![src.as_slice()];
       let mut writer = dst.as_mut_slice();
       gpu_table.write_into(&mut writer).unwrap();
     })
   });
   group.bench_function("iter_write_mut_slice", |b| {
     b.iter(|| {
-      let gpu_table = append_gpu_data(EmptyGpuTable, GpuDataIter::<u32, _>::from(src.iter().copied()));
+      let gpu_table = gpu_table![GpuDataIter::<u32, _>::from(src.iter().copied())];
       let mut writer = dst.as_mut_slice();
       gpu_table.write_into(&mut writer).unwrap();
     })
   });
   group.bench_function("slice_write_cursor", |b| {
     b.iter(|| {
-      let gpu_table = append_gpu_data(EmptyGpuTable, src.as_slice());
+      let gpu_table = gpu_table![src.as_slice()];
       let mut writer = Cursor::new(dst.as_mut_slice());
       gpu_table.write_into(&mut writer).unwrap();
     })
   });
   group.bench_function("iter_write_cursor", |b| {
     b.iter(|| {
-      let gpu_table = append_gpu_data(EmptyGpuTable, GpuDataIter::<u32, _>::from(src.iter().copied()));
+      let gpu_table = gpu_table![GpuDataIter::<u32, _>::from(src.iter().copied())];
       let mut writer = Cursor::new(dst.as_mut_slice());
       gpu_table.write_into(&mut writer).unwrap();
     })

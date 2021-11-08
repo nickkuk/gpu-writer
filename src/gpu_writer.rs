@@ -5,6 +5,20 @@ pub fn append_gpu_data<T: GpuTable, D: GpuData>(gpu_table: T, gpu_data: D) -> im
   Cons(gpu_data, gpu_table)
 }
 
+#[macro_export]
+macro_rules! gpu_table {
+  ($($data:expr,)+) => { gpu_table!($($data),+) };
+  ($($data:expr),*) => {
+    {
+      let _gpu_table = EmptyGpuTable;
+      $(
+        let _gpu_table = append_gpu_data(_gpu_table, $data);
+      )*
+      _gpu_table
+    }
+  };
+}
+
 pub trait GpuData {
   fn size(&self) -> usize;
   fn write_into<W: Write>(self, writer: &mut W) -> Result<(), Error>;
@@ -119,10 +133,11 @@ mod tests {
     let x: [u32; 3] = [1, 2, 3];
     let y: [f32; 4] = [4.0, 5.0, 6.0, 7.0];
     let z_count: usize = 2;
-    let gpu_table = EmptyGpuTable;
-    let gpu_table = append_gpu_data(gpu_table, GpuDataIter::<u32, _>::from(x.into_iter()));
-    let gpu_table = append_gpu_data(gpu_table, &y as &[f32]);
-    let gpu_table = append_gpu_data(gpu_table, GpuDataIter::<f64, _>::from((0..z_count).map(|_| Default::default())));
+    let gpu_table = gpu_table![
+      GpuDataIter::<u32, _>::from(x.into_iter()),
+      &y as &[f32],
+      GpuDataIter::<f64, _>::from((0..z_count).map(|_| Default::default())),
+    ];
     let data_count = data_count(&gpu_table);
     assert_eq!(data_count, 3);
     assert_eq!(gpu_table.data_size(), 4 * (x.len() + y.len() + 2 * z_count));
